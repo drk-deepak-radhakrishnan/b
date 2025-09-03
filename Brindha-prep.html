@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Operational Excellence — TPM Interview Deck</title>
+  <!-- Fonts: Everyday Sans (local if installed) with Lato fallback -->
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-0P9m3s3J+5w8bI7q8r0K4nR7t1V6vL8bV7e5kKXb9eQ6i0E0fUu1r1o7pW1rY0VZcQkYg3C1vQmWw2E2I8a1wQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    :root {
+      --blue: #0053e2; /* Walmart Blue */
+      --bg: #f7f9fc;   /* offwhite */
+      --bg-2: #ffffff; /* white */
+      --ink: #0f172a;  /* deep slate */
+      --muted: #4b5563;
+      --shadow: 0 10px 30px rgba(0,0,0,.08);
+      --radius: 18px;
+      --ts: 0 0 1px rgba(0,0,0,.25); /* required text-shadow */
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: linear-gradient(180deg, var(--bg), #ffffff 65%);
+      color: var(--ink);
+      font-family: 'Everyday Sans', 'Lato', sans-serif; /* as requested */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Deck & Slides */
+    .deck { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+    .slide {
+      position: absolute; inset: 0;
+      display: grid; place-items: center;
+      padding: 4rem clamp(2rem, 6vw, 6rem);
+      opacity: 0; transform: translateX(30px) scale(.98);
+      transition: opacity .7s ease, transform .7s ease;
+      background: transparent;
+    }
+    .slide.active { opacity: 1; transform: translateX(0) scale(1); }
+
+    /* Slide inner card */
+    .card {
+      width: min(1100px, 90vw);
+      background: var(--bg-2);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: clamp(1.25rem, 3vw, 2.5rem);
+      border: 1px solid rgba(0,83,226,.08);
+    }
+
+    header.title {
+      text-align: center;
+      padding: 3rem 1rem;
+      background: conic-gradient(from 210deg at 50% 50%, rgba(0,83,226,.08), rgba(0,83,226,.0));
+      border-radius: calc(var(--radius) - 6px);
+    }
+
+    h1 {
+      margin: 0 0 .25rem 0;
+      font-weight: 900; letter-spacing: -.01em;
+      font-size: clamp(2rem, 4vw, 3.25rem);
+      color: var(--ink);
+      text-shadow: var(--ts);
+    }
+    h2 { font-weight: 800; margin: 0 0 .75rem; color: var(--ink); text-shadow: var(--ts); }
+    h3 { font-weight: 700; margin: 1.25rem 0 .5rem; color: var(--ink); text-shadow: var(--ts); }
+    p  { font-weight: 400; line-height: 1.6; color: var(--muted); }
+    .kicker { color: var(--blue); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; font-size: .8rem; }
+
+    .accent {
+      color: var(--blue);
+      text-shadow: var(--ts);
+    }
+
+    /* Grids */
+    .grid { display: grid; gap: 1rem; }
+    .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+    .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    @media (max-width: 900px){
+      .grid.cols-2, .grid.cols-3 { grid-template-columns: 1fr; }
+    }
+
+    .pill {
+      display: inline-flex; align-items: center; gap:.5rem;
+      padding: .5rem .8rem; border-radius: 999px; font-weight: 600;
+      background: rgba(0,83,226,.08); color: var(--blue);
+      border: 1px solid rgba(0,83,226,.12);
+    }
+
+    .kpi {
+      background: linear-gradient(180deg, #fff, #f5f7ff);
+      border: 1px solid rgba(0,83,226,.12);
+      border-radius: 16px; padding: 1rem 1.25rem; box-shadow: var(--shadow);
+    }
+    .kpi h4 { margin: 0 0 .25rem; font-weight: 800; text-shadow: var(--ts); }
+    .kpi p { margin: 0; }
+
+    /* Footer nav */
+    .controls {
+      position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: .75rem; z-index: 10;
+      background: rgba(255,255,255,.7); backdrop-filter: blur(6px);
+      border: 1px solid rgba(0,0,0,.06); border-radius: 14px; padding: .35rem .5rem;
+      box-shadow: var(--shadow);
+    }
+    .btn {
+      width: 42px; height: 42px; border-radius: 10px; border: 1px solid rgba(0,0,0,.08);
+      display: grid; place-items: center; cursor: pointer; background: var(--bg-2);
+      transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+    .btn.primary { background: var(--blue); color: #fff; border-color: rgba(0,83,226,.5); }
+
+    .progress {
+      width: 180px; height: 8px; border-radius: 999px; background: rgba(0,83,226,.12);
+      overflow: hidden; border: 1px solid rgba(0,83,226,.18);
+    }
+    .progress > i { display: block; height: 100%; width: 0%; background: var(--blue); }
+    .idx { font-weight: 700; color: var(--ink); min-width: 68px; text-align: center; }
+
+    /* Animations */
+    .reveal { opacity: 0; transform: translateY(16px); transition: opacity .6s ease .15s, transform .6s ease .15s; }
+    .active .reveal { opacity: 1; transform: translateY(0); }
+
+    /* Utility */
+    ul { margin: .5rem 0 0 1.25rem; }
+    li { margin: .35rem 0; }
+    .hr { height: 1px; background: rgba(0,0,0,.08); margin: 1rem 0; }
+    .icon { font-size: 1.15rem; color: var(--blue); }
+  </style>
+</head>
+<body>
+  <div class="deck" aria-live="polite" aria-label="Operational Excellence Presentation">
+
+    <!-- Slide 1: Title -->
+    <section class="slide active" role="group" aria-roledescription="slide" aria-label="Title">
+      <div class="card">
+        <header class="title">
+          <div class="kicker">Technical Program Management</div>
+          <h1>Operational Excellence</h1>
+          <p style="font-weight:600; margin:.25rem 0 1rem; color:var(--muted); text-shadow:var(--ts)">Key Concepts, Metrics, and Practices</p>
+          <div style="display:flex; gap:.5rem; justify-content:center; flex-wrap:wrap;">
+            <span class="pill"><i class="fa-solid fa-gauge-high"></i> Efficiency</span>
+            <span class="pill"><i class="fa-solid fa-shield-heart"></i> Reliability</span>
+            <span class="pill"><i class="fa-solid fa-chart-line"></i> Measurement</span>
+            <span class="pill"><i class="fa-solid fa-arrows-rotate"></i> Improvement</span>
+          </div>
+        </header>
+      </div>
+    </section>
+
+    <!-- Slide 2: Definition -->
+    <section class="slide" role="group" aria-roledescription="slide" aria-label="Definition">
+      <div class="card">
+        <h2><i class="fa-solid fa-circle-check icon"></i> What is Operational Excellence?</h2>
+        <p class="reveal">A culture and system where teams reliably deliver high-quality outcomes, reduce waste, and continuously improve. The aim is predictable delivery, low defects, and fast recovery when things go wrong.</p>
+        <div class="hr"></div>
+        <div class="grid cols-2">
+          <div class="reveal">
+            <h3 class="accent">North Star</h3>
+            <ul>
+              <li>Do the <strong>right things</strong>, the <strong>right way</strong>, every time.</li>
+              <li>Make outcomes <strong>measurable</strong> and <strong>repeatable</strong>.</li>
+              <li>Build feedback loops to learn and improve.</li>
+            </ul>
+          </div>
+          <div class="reveal">
+            <h3 class="accent">TPM Lens</h3>
+            <ul>
+              <li>Orchestrate <strong>process</strong>, <strong>quality</strong>, and <strong>flow</strong>.</li>
+              <li>Expose truth via <strong>data</strong> (not opinions).</li>
+              <li>Institutionalize learnings across teams.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 3: Pillars -->
+    <section class="slide" role="group" aria-roledescription="slide" aria-label="Pillars">
+      <div class="card">
+        <h2><i class="fa-solid fa-layer-group icon"></i> Pillars</h2>
+        <div class="grid cols-3">
+          <div class="kpi reveal">
+            <h4><i class="fa-solid fa-list-check icon"></i> Standardized Processes</h4>
+            <p>Definition of Done, release checklists, clear intake, crisp ceremonies.</p>
+          </div>
+          <div class="kpi reveal">
+            <h4><i class="fa-solid fa-chart-simple icon"></i> Metrics & Measurement</h4>
+            <p>Cycle/Lead time, Velocity, Defect rate, MTTR, Escaped defects.</p>
+          </div>
+          <div class="kpi reveal">
+            <h4><i class="fa-solid fa-shield-halved icon"></i> Reliability & Quality</h4>
+            <p>Automated tests, CI/CD, canary/rollbacks, SLOs, error budgets.</p>
+          </div>
+          <div class="kpi reveal">
+            <h4><i class="fa-solid fa-arrows-rotate icon"></i> Continuous Improvement</h4>
+            <p>Retros, postmortems, RCA, action tracking, Kaizen mindset.</p>
+          </div>
+          <div class="kpi reveal">
+            <h4><i class="fa-solid fa-bolt icon"></i> Efficiency</h4>
+            <p>Reduce handoffs, right-size work, automate repetitive tasks.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 4: Metrics Overview -->
+    <section class="slide" role="group" aria-roledescription="slide" aria-label="Metrics Overview">
+      <div class="card">
+        <h2><i class="fa-solid fa-chart-pie icon"></i> Core Metrics (Overview)</h2>
+        <div class="grid cols-3">
+          <div class="kpi reveal"><h4>Cycle Time</h4><p>Start → Done for a story. Shorter = faster flow.</p></div>
+          <div class="kpi reveal"><h4>Lead Time</h4><p>Request → Delivered. Responsiveness to demand.</p></div>
+          <div class="kpi reveal"><h4>Velocity</h4><p>Points completed / sprint. For predictability.</p></div>
+          <div class="kpi reveal"><h4>Defect Rate</h4><p>Issues per unit of work. Lower = better quality.</p></div>
+          <div class="kpi reveal"><h4>Escaped Defects</h4><p>Bugs found in prod. Tighten pre-release gates.</p></div>
+          <div class="kpi reveal"><h4>MTTR</h4><p>Mean Time To Recovery from incidents. Lower is better.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 5: Cycle vs Lead Time -->
+    <section class="slide" role="group" aria-roledescription="slide" aria-label="Cycle vs Lead Time">
+      <div class="card">
+        <h2><i class="fa-solid fa-road icon"></i> Cycle Time vs Lead Time</h2>
+        <div class="grid cols-2">
+          <div class="reveal">
+            <h3>Cycle Time</h3>
+            <p>Time a ticket spends from <strong>In Progress</strong> to <strong>Done</strong>. Helps spot WIP limits, handoff delays, or review bottlenecks.</p>
+            <ul>
+              <li>Shorten with smaller stories, clearer AC, faster reviews.</li>
+              <li>Visualize using control charts & cumulative flow.</li>
+            </ul>
+          </div>
+          <div class="reveal">
+            <h3>Lead Time</h3>
+            <p>Time from <strong>request created</strong> to <strong>delivered</strong>. Exposes intake, prioritization, and backlog wait issues.</p>
+            <ul>
+              <li>Shorten with better intake and prioritization.</li>
+              <li>Watch queue times before work starts.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 6: Reliability & Quality Practices -->
+    <section class="slide" role="group" aria-roledescription="slide" aria-label="Reliability & Quality">
+      <div class="card">
+        <h2><i class="fa-solid fa-shield-heart icon"></i> Reliability & Quality Practices</h2>
+        <div class="grid cols-3">
+          <div class="kpi reveal"><h4>Testing Pyramid</h4><p>Unit → Integration → E2E, plus performance & security gates.</p></div>
+          <div class="kpi reveal"><h4>CI/CD & Release</h4><p>Automated builds, canary releases, blue/green, feature flags.</p></div>
+          <div class="kpi reveal"><h4>Operability</h4><p>Logging, tracing, alerting (SLOs), runbooks, on-call readiness.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 7: Jira Hygiene -->
+    <section class="slide" role="group" aria-roledescription="slide" aria-label="Jira Hygiene">
+      <div class="card">
+        <h2><i class="fa-brands fa-jira icon"></i> Jira Hygiene</h2>
+        <ul class="reveal">
+          <li>Clear tickets: description, acceptance criteria, priority.</li>
+          <li>Up-to-date status; no stale items in wrong columns.</li>
+          <li>Proper assignment; correct sizing & estimation.</li>
+          <li>Regular backlog refinement; close tickets on completion.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Slide 8: Scrum Ceremonies -->
+    <section class="slide" role="group" aria-roledescription="slide" aria-label="Scrum Ceremonies">
+      <div class="card">
+        <h2><i class="fa-solid fa-people-group icon"></i> Scrum Ceremonies</h2>
+        <div class="grid cols-2">
+          <div class="reveal">
+            <h3>1. Sprint Planning</h3>
+            <p>Define sprint goal, select scope, break down stories, align capacity.</p>
+            <h3>2. Daily Stand-up</h3>
+            <p>15-min sync to align and surface blockers quickly.</p>
+            <h3>3. Backlog Grooming</h3>
+            <p>Clarify, split, estimate, and prioritize upcoming work.</p>
+          </div>
+          <div class="reveal">
+            <h3>4. Sprint Review</h3>
+            <p>Demo increment to stakeholders; gather feedback.</p>
+            <h3>5. Sprint Retrospective</h3>
+            <p>Reflect, identify improvements, commit to action items.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 9: Example & Impact -->
+    <section class="slide" role="group" aria-roledescription="slide" aria-label="Example Impact">
+      <div class="card">
+        <h2><i class="fa-solid fa-screwdriver-wrench icon"></i> Example Program Outcome</h2>
+        <div class="grid cols-2">
+          <div class="reveal">
+            <h3>Intervention</h3>
+            <ul>
+              <li>Improved backlog grooming + AC quality.</li>
+              <li>WIP limits + faster code review SLAs.</li>
+              <li>Automated smoke + canary rollout.</li>
+            </ul>
+          </div>
+          <div class="reveal">
+            <h3>Impact</h3>
+            <ul>
+              <li><strong>−30% Cycle Time</strong> within two sprints.</li>
+              <li><strong>−40% Escaped Defects</strong> post-release.</li>
+              <li><strong>↑ Predictability</strong> (velocity stability, fewer rollbacks).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 10: Close -->
+    <section class="slide" role="group" aria-roledescription="slide" aria-label="Close">
+      <div class="card">
+        <h2><i class="fa-solid fa-star icon"></i> Takeaways</h2>
+        <ul class="reveal">
+          <li>Measure what matters; expose bottlenecks with data.</li>
+          <li>Standardize the basics; automate where possible.</li>
+          <li>Short feedback loops drive quality and speed.</li>
+          <li>Make excellence a habit, not a project.</li>
+        </ul>
+        <p class="reveal" style="margin-top:1rem; font-weight:600; color:var(--muted);">Use ← / → keys, space, or the on-screen controls to navigate.</p>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Controls -->
+  <nav class="controls" aria-label="presentation controls">
+    <button class="btn" id="prev" aria-label="Previous slide"><i class="fa-solid fa-chevron-left"></i></button>
+    <div class="idx" aria-live="polite"><span id="cur">1</span>/<span id="tot">10</span></div>
+    <div class="progress" aria-hidden="true"><i id="bar"></i></div>
+    <button class="btn primary" id="next" aria-label="Next slide"><i class="fa-solid fa-chevron-right"></i></button>
+  </nav>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const nextBtn = document.getElementById('next');
+    const prevBtn = document.getElementById('prev');
+    const curEl = document.getElementById('cur');
+    const totEl = document.getElementById('tot');
+    const bar = document.getElementById('bar');
+
+    let idx = 0;
+    totEl.textContent = slides.length;
+
+    function setActive(n){
+      slides.forEach((s,i)=> s.classList.toggle('active', i===n));
+      idx = n;
+      curEl.textContent = (n+1);
+      const pct = ((n) / (slides.length-1)) * 100;
+      bar.style.width = pct + '%';
+    }
+
+    function next(){ if(idx < slides.length - 1) setActive(idx+1); }
+    function prev(){ if(idx > 0) setActive(idx-1); }
+
+    nextBtn.addEventListener('click', next);
+    prevBtn.addEventListener('click', prev);
+
+    document.addEventListener('keydown', (e)=>{
+      if(['ArrowRight','PageDown',' '].includes(e.key)) { e.preventDefault(); next(); }
+      if(['ArrowLeft','PageUp','Backspace'].includes(e.key)) { e.preventDefault(); prev(); }
+      if(e.key === 'Home') setActive(0);
+      if(e.key === 'End') setActive(slides.length-1);
+    });
+
+    // Click anywhere to advance (except on controls)
+    document.addEventListener('click', (e)=>{
+      const withinControls = e.target.closest('.controls');
+      if(!withinControls) next();
+    });
+
+    // Resize handler keeps layout crisp
+    window.addEventListener('resize', ()=>{
+      // could add responsive recalcs if needed
+    });
+  </script>
+</body>
+</html>
